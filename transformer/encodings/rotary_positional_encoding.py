@@ -1,4 +1,5 @@
 import torch
+import einops 
 
 class RotaryPositionalEncoding(torch.nn.Module):
   def __init__(self, dk, max_len=5000, theta=1000.0):
@@ -20,7 +21,6 @@ class RotaryPositionalEncoding(torch.nn.Module):
     x_ = torch.view_as_complex(einops.rearrange(x.float(), 'B n_heads T (dk_2 two) -> B n_heads T dk_2 two', B=B, T=T, n_heads=n_heads, two=2))
 
     x_ = torch.view_as_real(x_ * self.freqs[:T,:].unsqueeze(0).unsqueeze(0)).type_as(x) # (B nh T dk/2) * (1 1 T dk/2) = (B nh T dk/2)
-    print(f"{x_.shape=}")
     return einops.rearrange(x_, 'B n_heads T dk_2 two -> B n_heads T (dk_2 two)', B=B, T=T, n_heads=n_heads, two=2)
 
   def forward(self, xq, xk):
